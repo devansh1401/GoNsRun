@@ -1,4 +1,4 @@
-# Container From Scratch
+# 📦 Container From Scratch
 
 A low-level container runtime built from first principles in Go. This project peels back the layers of abstraction to reveal how container technology actually works.
 
@@ -10,7 +10,7 @@ I built this project to deeply understand the core technologies behind container
 - Control groups for resource limits
 - Filesystem manipulation for environment consistency
 
-## ✅ Implemented Features
+## Implemented Features
 
 - [x] **Process Isolation**: Using Linux namespaces (`CLONE_NEWUTS`, `CLONE_NEWPID`, `CLONE_NEWNS`)
 - [x] **Custom Environment**: Isolated hostname and process tree
@@ -26,7 +26,7 @@ I built this project to deeply understand the core technologies behind container
 - [ ] Volume mounting for data persistence
 - [ ] Performance optimizations
 
-## How It Works
+## 🛠️ How It Works
 
 This project demonstrates containerization from scratch using these key mechanisms:
 
