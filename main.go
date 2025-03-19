@@ -15,7 +15,7 @@ func main() {
 	case "run":
 		run()
 	case "child":
-		fmt.Println("'child' command not yet implemented")
+		child()
 	default:
 		panic("Invalid command. Available commands:\n" +
 			"\t'run'    : Creates a new process in a containerized environment.\n" +
@@ -38,5 +38,20 @@ func run() {
 
 	if err := cmd.Run(); err != nil {
 		panic(fmt.Sprintf("Failed to start child process: %v", err))
+	}
+}
+
+// Inside the namespace
+func child() {
+	fmt.Printf("Running %v as pid %d (child)\n", os.Args[2:], os.Getpid())
+
+	// Run the command inside the containerized environment
+	cmd := exec.Command(os.Args[2], os.Args[3:]...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		panic(fmt.Sprintf("Failed to run command in child process: %v", err))
 	}
 }
