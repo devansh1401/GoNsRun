@@ -65,25 +65,26 @@ func unmountProc() error {
 func cg() error {
 	cgroups := "/sys/fs/cgroup/"
 	pids := filepath.Join(cgroups, "pids")
+	cgroupPath := filepath.Join(pids, "your_name")
 
-	// Create the cgroup directory
-	if err := os.Mkdir(filepath.Join(pids, "your_name"), 0755); err != nil {
-		return fmt.Errorf("Failed to create cgroup directory: %w", err)
+	// Create the cgroup directory, ignore error if already exists
+	if err := os.Mkdir(cgroupPath, 0755); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("failed to create cgroup directory: %w", err)
 	}
 
 	// Set the maximum number of processes to 20
-	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/pids.max"), []byte("20"), 0700); err != nil {
-		return fmt.Errorf("Failed to set pids.max: %w", err)
+	if err := ioutil.WriteFile(filepath.Join(cgroupPath, "pids.max"), []byte("20"), 0700); err != nil {
+		return fmt.Errorf("failed to set pids.max: %w", err)
 	}
 
 	// Set notify_on_release to 1, so the cgroup is removed after use
-	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/notify_on_release"), []byte("1"), 0700); err != nil {
-		return fmt.Errorf("Failed to set notify_on_release: %w", err)
+	if err := ioutil.WriteFile(filepath.Join(cgroupPath, "notify_on_release"), []byte("1"), 0700); err != nil {
+		return fmt.Errorf("failed to set notify_on_release: %w", err)
 	}
 
 	// Add the current process to the cgroup
-	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/cgroup.procs"), []byte(strconv.Itoa(os.Getpid())), 0700); err != nil {
-		return fmt.Errorf("Failed to add process to cgroup: %w", err)
+	if err := ioutil.WriteFile(filepath.Join(cgroupPath, "cgroup.procs"), []byte(strconv.Itoa(os.Getpid())), 0700); err != nil {
+		return fmt.Errorf("failed to add process to cgroup: %w", err)
 	}
 	
 	return nil
