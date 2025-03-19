@@ -1,34 +1,70 @@
-# Containers From Scratch in Go
+# Container From Scratch
 
-**Replicates the core of `docker run` in Go.**
+A minimal container runtime implementation built in Go. This project replicates core container functionality to demonstrate how containers work under the hood.
 
-💡 **WHY THIS MATTERS**:
-Understanding containers is key for modern software deployment. Containers streamline building, scaling, and running apps, making you a better developer.
+## Why Build This?
 
-> ⚠️ **Linux user?** You can run this directly via CLI. Not on Linux? Here's how to run it with Docker:
+I created this project to deeply understand container technology by implementing it from first principles. Containers aren't magic - they're just clever uses of Linux kernel features like namespaces and cgroups!
 
-### 1. Install Docker
+## Implemented Features:
 
-- Download Docker from [Docker Desktop](https://www.docker.com/products/docker-desktop).
-- Install and launch Docker Desktop.
+- [x] Process isolation using Linux namespaces (`CLONE_NEWUTS`, `CLONE_NEWPID`, `CLONE_NEWNS`)
+- [x] Custom hostname within container
+- [x] Filesystem isolation via `chroot`
+- [x] Process filesystem (`/proc`) mounting
+- [x] Resource limitations using cgroups
+- [x] Cross-platform compatibility (graceful fallbacks for non-Linux systems)
 
-### 2. Build the Docker Image
+## Planned Enhancements:
 
-Run this in your project directory:
+- [ ] Network namespace isolation
+- [ ] User namespace implementation for better security
+- [ ] Volume mounting support
+- [ ] Custom container image format
+- [ ] Better error handling and recovery
+- [ ] Performance optimizations for resource usage
+- [ ] Support for container metadata and labels
+
+## Usage
+
+### For Linux Users:
+
+```bash
+# Run a bash shell inside a container
+go run main.go run /bin/bash
+```
+
+### For Non-Linux Users (via Docker):
+
+#### 1. Install Docker
+
+Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
+
+#### 2. Build the Docker Image
 
 ```bash
 docker build -t container-from-scratch .
 ```
 
-### 3. Run the Container
-
-After building the image, you can run your Go application inside a Docker container:
-
-> 📌 **Note:** The `--privileged flag` is needed due to Docker's default security mechanisms.
+#### 3. Run the Container
 
 ```bash
 docker run --rm -it --privileged container-from-scratch ./main run /bin/bash
 ```
 
-- `--rm`: Removes the container after stopping.
-- `-it`: Opens an interactive terminal.
+> **Note:** The `--privileged` flag is necessary because we're running container technology inside a container.
+
+## How It Works
+
+This project implements containerization from scratch using:
+
+1. **Process Isolation**: Linux namespaces create isolated process environments
+2. **Filesystem Isolation**: `chroot` creates a separate root filesystem
+3. **Resource Control**: cgroups limit the resources used by processes
+4. **Mount Management**: Proper mounting/unmounting of the proc filesystem
+
+Check the `learning_docs` folder for detailed explanations of the underlying concepts!
+
+## Limitations
+
+This is an educational project and doesn't implement all features of production container runtimes like Docker. Use for learning, not for production workloads.
