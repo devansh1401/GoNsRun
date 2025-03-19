@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"os/exec"
 	"syscall"
 )
@@ -26,11 +27,22 @@ func setHostName() error {
 	return syscall.Sethostname([]byte("container"))
 }
 
-// Placeholder implementations - to be implemented in future commits
+// Isolates the filesystem by using chroot and chdir to change the root to a specific directory
 func isolateFilesystem() error {
+	// Change root to the specified directory
+	if err := syscall.Chroot("/home/your_name/ubuntufs"); err != nil {
+		return fmt.Errorf("failed to chroot: %w", err)
+	}
+
+	// Change working directory to the new root
+	if err := syscall.Chdir("/"); err != nil {
+		return fmt.Errorf("failed to chdir: %w", err)
+	}
+
 	return nil
 }
 
+// Placeholder implementations - to be implemented in future commits
 func mountProc() error {
 	return nil
 }
