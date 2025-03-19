@@ -42,12 +42,19 @@ func isolateFilesystem() error {
 	return nil
 }
 
-// Placeholder implementations - to be implemented in future commits
+// Mount the proc filesystem inside the container
 func mountProc() error {
+	if err := syscall.Mount("proc", "proc", "proc", 0, ""); err != nil {
+		return fmt.Errorf("failed to mount proc filesystem: %w", err)
+	}
 	return nil
 }
 
+// Unmount the proc filesystem after the process is done
 func unmountProc() error {
+	if err := syscall.Unmount("proc", 0); err != nil {
+		return fmt.Errorf("failed to unmount proc filesystem: %w", err)
+	}
 	return nil
 }
 
