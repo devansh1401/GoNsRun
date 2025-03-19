@@ -4,7 +4,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"syscall"
 )
 
@@ -59,5 +63,28 @@ func unmountProc() error {
 }
 
 func cg() error {
+	cgroups := "/sys/fs/cgroup/"
+	pids := filepath.Join(cgroups, "pids")
+
+	// Create the cgroup directory
+	if err := os.Mkdir(filepath.Join(pids, "your_name"), 0755); err != nil {
+		return fmt.Errorf("Failed to create cgroup directory: %w", err)
+	}
+
+	// Set the maximum number of processes to 20
+	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/pids.max"), []byte("20"), 0700); err != nil {
+		return fmt.Errorf("Failed to set pids.max: %w", err)
+	}
+
+	// Set notify_on_release to 1, so the cgroup is removed after use
+	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/notify_on_release"), []byte("1"), 0700); err != nil {
+		return fmt.Errorf("Failed to set notify_on_release: %w", err)
+	}
+
+	// Add the current process to the cgroup
+	if err := ioutil.WriteFile(filepath.Join(pids, "your_name/cgroup.procs"), []byte(strconv.Itoa(os.Getpid())), 0700); err != nil {
+		return fmt.Errorf("Failed to add process to cgroup: %w", err)
+	}
+	
 	return nil
 }
