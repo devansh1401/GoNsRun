@@ -1,29 +1,58 @@
 # Container From Scratch
 
-A minimal container runtime implementation built in Go. This project replicates core container functionality to demonstrate how containers work under the hood.
+A low-level container runtime built from first principles in Go. This project peels back the layers of abstraction to reveal how container technology actually works.
 
-## Why Build This?
+## What & Why
 
-I created this project to deeply understand container technology by implementing it from first principles. Containers aren't magic - they're just clever uses of Linux kernel features like namespaces and cgroups!
+I built this project to deeply understand the core technologies behind containers. By implementing containerization primitives directly with Linux kernel features, I've learned that containers aren't magic - they're just clever applications of:
 
-## Implemented Features:
+- Process namespaces for isolation
+- Control groups for resource limits
+- Filesystem manipulation for environment consistency
 
-- [x] Process isolation using Linux namespaces (`CLONE_NEWUTS`, `CLONE_NEWPID`, `CLONE_NEWNS`)
-- [x] Custom hostname within container
-- [x] Filesystem isolation via `chroot`
-- [x] Process filesystem (`/proc`) mounting
-- [x] Resource limitations using cgroups
-- [x] Cross-platform compatibility (graceful fallbacks for non-Linux systems)
+## ✅ Implemented Features
 
-## Planned Enhancements:
+- [x] **Process Isolation**: Using Linux namespaces (`CLONE_NEWUTS`, `CLONE_NEWPID`, `CLONE_NEWNS`)
+- [x] **Custom Environment**: Isolated hostname and process tree
+- [x] **Filesystem Isolation**: Restricted view using `chroot`
+- [x] **Process Management**: `/proc` filesystem mounting for process visibility
+- [x] **Resource Controls**: Basic limits using cgroups
+- [x] **Cross-Platform**: Graceful fallbacks for non-Linux systems
 
-- [ ] Network namespace isolation
-- [ ] User namespace implementation for better security
-- [ ] Volume mounting support
-- [ ] Custom container image format
-- [ ] Better error handling and recovery
-- [ ] Performance optimizations for resource usage
-- [ ] Support for container metadata and labels
+## Future Enhancements
+
+- [ ] Network namespace isolation for container networking
+- [ ] User namespace implementation for improved security
+- [ ] Volume mounting for data persistence
+- [ ] Performance optimizations
+
+## How It Works
+
+This project demonstrates containerization from scratch using these key mechanisms:
+
+### 1. Process Isolation
+
+```go
+// Create isolated process environment using namespaces
+cmd.SysProcAttr = &syscall.SysProcAttr{
+    Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+}
+```
+
+### 2. Filesystem Boundaries
+
+```go
+// Change root filesystem to create isolation
+syscall.Chroot("/path/to/container/root")
+syscall.Chdir("/")
+```
+
+### 3. Resource Management
+
+```go
+// Limit container to 20 processes max
+ioutil.WriteFile(filepath.Join(pids, "container/pids.max"), []byte("20"), 0700)
+```
 
 ## Usage
 
@@ -34,37 +63,26 @@ I created this project to deeply understand container technology by implementing
 go run main.go run /bin/bash
 ```
 
-### For Non-Linux Users (via Docker):
-
-#### 1. Install Docker
-
-Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
-
-#### 2. Build the Docker Image
+### For Everyone Else (Docker):
 
 ```bash
+# Build and run using Docker
 docker build -t container-from-scratch .
-```
-
-#### 3. Run the Container
-
-```bash
 docker run --rm -it --privileged container-from-scratch ./main run /bin/bash
 ```
 
-> **Note:** The `--privileged` flag is necessary because we're running container technology inside a container.
+> **Note:** The `--privileged` flag is needed because we're running container tech inside a container.
 
-## How It Works
+## Learn More
 
-This project implements containerization from scratch using:
+Check the `docs` folder for detailed explanations of the concepts behind this implementation. This project is for educational purposes - not production use!
 
-1. **Process Isolation**: Linux namespaces create isolated process environments
-2. **Filesystem Isolation**: `chroot` creates a separate root filesystem
-3. **Resource Control**: cgroups limit the resources used by processes
-4. **Mount Management**: Proper mounting/unmounting of the proc filesystem
+## Technical Details
 
-Check the `learning_docs` folder for detailed explanations of the underlying concepts!
+This implementation uses:
 
-## Limitations
-
-This is an educational project and doesn't implement all features of production container runtimes like Docker. Use for learning, not for production workloads.
+- Go's syscall package for direct kernel interaction
+- Linux namespaces for process isolation
+- cgroups for resource management
+- chroot for filesystem isolation
+- proc filesystem for process visibility
